@@ -82,10 +82,14 @@ class Probes:
     @staticmethod
     def main(topo, length_of_probes_array, debug=True):
         random.seed(400)
+        ''' Set the topology'''
         probes = Probes(topo)
+        ''' Find possible source switches'''
         source_switch = probes.source_switches()
+        ''' Solving the problem'''
         for length_of_probes in length_of_probes_array:
             for src in source_switch:
+                ''' find all possible probes starting from src node and have length of length_of_probes'''
                 probes.find(src, length_of_probes)
 
         path_delays, rounded_path_delays, link_delays = probes.make_test(1, 10, 0)
@@ -112,6 +116,6 @@ def heuristic_for_ILP(topo=None, length_of_probes_array=None, debug=True):
     if length_of_probes_array is None: print('Array_of_LengthOfProbes is not specified; using [2, 7] ...'); length_of_probes_array = [2,5]
     return Probes.main(topo, length_of_probes_array, debug)
 
-# length_of_probes_array = [2, 7]
-# topo = None
-# heuristic_for_ILP(topo=topo, length_of_probes_array=length_of_probes_array, debug=False)
+length_of_probes_array = [2,5]
+topo = None
+heuristic_for_ILP(topo=topo, length_of_probes_array=length_of_probes_array, debug=False)
