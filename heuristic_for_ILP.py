@@ -145,6 +145,6 @@ def heuristic_for_ILP(topo=None, length_of_probes_array=None, max_number_probes_
     if length_of_probes_array is None: print('Array_of_LengthOfProbes is not specified; using [2, 7] ...'); length_of_probes_array = [2,5]
     return Probes.main(topo, length_of_probes_array, max_number_probes_per_link, debug)
 
-length_of_probes_array = [2,5]
-topo = None
-heuristic_for_ILP(topo=topo, length_of_probes_array=length_of_probes_array, debug=False)
+# length_of_probes_array = [2,5]
+# topo = None
+# heuristic_for_ILP(topo=topo, length_of_probes_array=length_of_probes_array, debug=False)
