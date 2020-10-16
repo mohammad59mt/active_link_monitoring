@@ -9,7 +9,9 @@ class Probes:
         self.linkBasedPath_arrayOfSet = []  # list of selected paths (each path is a set of links)
         self.nodeBasedPath_arrayOfList = []  # list of selected paths (each path is an array of nodes)
         self.used_links_set = set()    # set of links that exist in one of the selected paths
-
+        self.paths_that_doesnot_have_a_NotTraversedLink = [] # list of paths that are from a correct source to a correct destination, but when they was found all links
+                                                             # included in them was traversed by an already selected path
+        self.sourceNodeOf_pathsThatDoesnothaveA_NotTraversedLink = []  # source nodes of the above paths (paths_that_doesnot_have_a_NotTraversedLink)
         self.topo_to_linkset()
     def topo_to_linkset(self):
         ''' switch_switch_set and host_switch_set'''
@@ -57,11 +59,17 @@ class Probes:
     def find(self, current_node, remaind_hops, destination_node=None, selected_path=list(),source_node=None):
         if remaind_hops == 0:
             ''' if you have found a valid path add it to the list of selected paths'''
-            if current_node == destination_node and len(selected_path) is not 0 and not set(selected_path) in self.linkBasedPath_arrayOfSet:
-                self.linkBasedPath_arrayOfList.append(selected_path)
-                self.linkBasedPath_arrayOfSet.append(set(selected_path))
-                self.nodeBasedPath_arrayOfList.append(Probes.convert_linkBasedPath_to_nodeBasedPath(selected_path, source_node))
-                self.used_links_set = set.union(self.used_links_set, selected_path)
+            ''' check if you have reached the destination and this path is not included in the currently selected paths'''
+            if current_node == destination_node and len(selected_path) != 0 and not set(selected_path) in self.linkBasedPath_arrayOfSet:
+                #if there is a link this path that is not met before add it to the list of selected paths.
+                if self.has_a_not_traversed_link(selected_path):
+                    self.linkBasedPath_arrayOfList.append(selected_path)
+                    self.linkBasedPath_arrayOfSet.append(set(selected_path))
+                    self.nodeBasedPath_arrayOfList.append(Probes.convert_linkBasedPath_to_nodeBasedPath(selected_path, source_node))
+                    self.used_links_set = set.union(self.used_links_set, selected_path)
+                else:
+                    self.paths_that_doesnot_have_a_NotTraversedLink.append(selected_path)
+                    self.sourceNodeOf_pathsThatDoesnothaveA_NotTraversedLink.append(source_node)
             return
         if destination_node is None: destination_node = current_node
         if source_node is None: source_node = current_node
@@ -70,6 +78,11 @@ class Probes:
                 if (a,b) not in selected_path:
                     if not Probes.loop_exists((selected_path+[(a,b)])):
                         self.find(current_node=b, remaind_hops=remaind_hops-1, destination_node=destination_node, selected_path=(selected_path+[(a,b)]), source_node=source_node)
+    def has_a_not_traversed_link(self, path_to_check):
+        # if the union of used_links_set (used links in the other selected paths) and the path_to_check is bigger than the length of used_links_set this means that
+        # there is a not traversed link in the path_to_check
+        if len(set.union(self.used_links_set, path_to_check)) > len(self.used_links_set): return True
+        else: return False
     def make_test(self, min_val, max_val, floating_pionts):
         random_between_min_max = lambda : (max_val-min_val)*random.random()+min_val
         round_value = lambda x: float(("{0:."+str(floating_pionts)+"f}").format(x))
@@ -78,6 +91,19 @@ class Probes:
         path_delays = [Path_Delay(path) for path in self.nodeBasedPath_arrayOfList]
         rounded_path_delays = [round_value(Path_Delay(path)) for path in self.nodeBasedPath_arrayOfList]
         return path_delays, rounded_path_delays, link_delays
+    ''' In the above lines, all possible paths will be investigated but only those that have not_traversed_link will be added to result. 
+    In the following function, if the number of selected paths is not enough, those paths (that doesn't have not_travesed_link) will be added to the result'''
+    def ifNumberOfSelectedPathsIsNotEnough_addNewPathsFrom_pathsThatDoesnotHaveA_NotTraversedLink(self):
+        number_of_existing_links = len(self.switch_switch_set)
+        number_of_probes = len(self.linkBasedPath_arrayOfList)
+        number_of_not_used_paths = len(self.paths_that_doesnot_have_a_NotTraversedLink)
+        if number_of_existing_links > number_of_probes and number_of_not_used_paths > 0:
+            for i in range(min(number_of_not_used_paths, number_of_existing_links-number_of_probes)):
+                self.linkBasedPath_arrayOfList.append(self.paths_that_doesnot_have_a_NotTraversedLink[i])
+                self.linkBasedPath_arrayOfSet.append(set(self.paths_that_doesnot_have_a_NotTraversedLink[i]))
+                self.nodeBasedPath_arrayOfList.append(Probes.convert_linkBasedPath_to_nodeBasedPath(self.paths_that_doesnot_have_a_NotTraversedLink[i], self.sourceNodeOf_pathsThatDoesnothaveA_NotTraversedLink[i]))
+                self.used_links_set = set.union(self.used_links_set, self.paths_that_doesnot_have_a_NotTraversedLink[i])
+        return
 
     @staticmethod
     def main(topo, length_of_probes_array, debug=True):
@@ -91,9 +117,12 @@ class Probes:
             for src in source_switch:
                 ''' find all possible probes starting from src node and have length of length_of_probes'''
                 probes.find(src, length_of_probes)
+        ''' In the above lines, all possible paths will be investigated but only those that have not_traversed_link will be added to result
+            In the following function, if the number of selected paths is not enough, those paths (that doesn't have not_travesed_link) will be added to the result'''
+        probes.ifNumberOfSelectedPathsIsNotEnough_addNewPathsFrom_pathsThatDoesnotHaveA_NotTraversedLink()
 
-        path_delays, rounded_path_delays, link_delays = probes.make_test(1, 10, 0)
         if debug:
+            path_delays, rounded_path_delays, link_delays = probes.make_test(1, 10, 0)
             print('Links delays: ', link_delays)
             print('Paths delays: ', path_delays)
             print('Rounded paths delays: ', rounded_path_delays)
