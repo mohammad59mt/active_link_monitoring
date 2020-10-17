@@ -52,12 +52,27 @@ class Probes:
 
     def add_host_to_selected_nodeBasedPaths(self):
         for node_based_path in self.nodeBasedPath_arrayOfList:
+            # find set of all links that connects the source switch to a host
             list_of_link_to_source_host = [link for link in self.host_switch_set if node_based_path[0] in link]
+            # find set of all links that connects the destination switch to a host
             list_of_link_to_destination_host = [link for link in self.host_switch_set if node_based_path[-1] in link]
-            link_to_source_host = list_of_link_to_source_host[random.randint(0,len(list_of_link_to_source_host)-1)]
-            link_to_destination_host = list_of_link_to_destination_host[random.randint(0, len(list_of_link_to_destination_host)-1)]
-            node_based_path.append(link_to_destination_host[0])
-            node_based_path.insert(0, link_to_source_host[0])
+            # if source and destination are not the same
+            if node_based_path[-1] != node_based_path[0]:
+                # choose randomly one of the hosts as source (among the hosts that are connected to the source switch)
+                link_to_source_host = list_of_link_to_source_host[random.randint(0,len(list_of_link_to_source_host)-1)]
+                # choose randomly one of the hosts as destination (among the hosts that are connected to the destination switch)
+                link_to_destination_host = list_of_link_to_destination_host[random.randint(0, len(list_of_link_to_destination_host)-1)]
+                # add the source host to the path
+                node_based_path.append(link_to_destination_host[0])
+                # add the destination host to the path
+                node_based_path.insert(0, link_to_source_host[0])
+            elif node_based_path[-1] == node_based_path[0]:
+                # choose randomly one of the hosts for source and another one for destination
+                link_to_host = list_of_link_to_source_host[random.randint(0,len(list_of_link_to_source_host)-1)]
+                # add the source host to the path
+                node_based_path.append(link_to_host[0])
+                # add the destination host to the path
+                node_based_path.insert(0, link_to_host[0])
     def find(self, current_node, remaind_hops, destination_node=None, selected_path=list(),source_node=None):
         if remaind_hops == 0:
             ''' if you have found a valid path add it to the list of selected paths'''
