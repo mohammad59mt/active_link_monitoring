@@ -202,20 +202,18 @@ class Probes:
         number_of_included_links = len(probes.used_links_set)
         return probes.nodeBasedPath_arrayOfList, number_of_probes, number_of_existing_links, number_of_included_links
 
-def path_and_flow_selector(topo, length_of_probes_array, ratio_of_numberOfProbes_to_numberOfLinks, max_number_probes, display_outputs=False):
-    """ max_number_of_probes=None and ratio_of_numberOfProbes_to_numberOfLinks=None means that only linearly_independent routes should be selected.
-        If max_number_of_probes is a number, then exactly max_number_of_probes probes would be returned unless it is lower than
-        the number of linearly-independent probes.
-        If ratio_of_numberOfProbes_to_numberOfLinks is a number then ratio_of_numberOfProbes_to_numberOfLinks*number_of_links probes would be returned.
-        If both ratio_of_numberOfProbes_to_numberOfLinks and max_number_of_probes have value, ratio_of_numberOfProbes_to_numberOfLinks will be ignored.
-        When the number of probes is pre-specified, first linearly_independent probes will be selected. If they
-        are not enough, the remaining probes will be random unique probes"""
-    nodeBasedPath_arrayOfList, number_of_probes, number_of_existing_links, number_of_included_links =  Probes.main(topo=topo, length_of_probes_array=length_of_probes_array,
-                                               ratio_of_numberOfProbes_to_numberOfLinks=ratio_of_numberOfProbes_to_numberOfLinks, max_number_probes=max_number_probes,
-                                               display_outputs=display_outputs)
-    return nodeBasedPath_arrayOfList, number_of_probes, number_of_existing_links, number_of_included_links
-# having two names for the same function
-PFS = path_and_flow_selector
+
+""" max_number_of_probes=None and ratio_of_numberOfProbes_to_numberOfLinks=None means that only linearly_independent routes should be selected.
+    If max_number_of_probes is a number, then exactly max_number_of_probes probes would be returned unless it is lower than
+    the number of linearly-independent probes.
+    If ratio_of_numberOfProbes_to_numberOfLinks is a number then ratio_of_numberOfProbes_to_numberOfLinks*number_of_links probes would be returned.
+    If both ratio_of_numberOfProbes_to_numberOfLinks and max_number_of_probes have value, ratio_of_numberOfProbes_to_numberOfLinks will be ignored.
+    When the number of probes is pre-specified, first linearly_independent probes will be selected. If they
+    are not enough, the remaining probes will be random unique probes"""
+
+# defining multiple names for the same function -- for the sake of simplicity when invoking
+path_and_flow_selector = Probes.main
+PFS = Probes.main
 
 def sample_run():
     """ Read this sample to understand how to use this function"""
