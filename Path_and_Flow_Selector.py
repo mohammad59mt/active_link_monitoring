@@ -152,7 +152,8 @@ class Probes:
         If ratio_of_numberOfProbes_to_numberOfLinks is a number then ratio_of_numberOfProbes_to_numberOfLinks*number_of_links probes would be returned.
         If both ratio_of_numberOfProbes_to_numberOfLinks and max_number_of_probes have value, ratio_of_numberOfProbes_to_numberOfLinks will be ignored.
         When the number of probes is pre-specified, first linearly_independent probes will be selected. If they
-        are not enough, the remaining probes will be random unique probes"""
+        are not enough, the remaining probes will be random unique probes
+        :param """
         random.seed(400)
         ''' Set the topology'''
         probes = Probes(topo)
